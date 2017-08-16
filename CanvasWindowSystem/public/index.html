@@ -10,11 +10,12 @@
 		<title>Canvas Window System</title>
 		<style>
 		body{
-			text-align: center;
+			/*text-align: center;*/
 		}
 		#canvas1{
 			border: 1px solid black;
-			border-radius: 10px;
+			border-top-radius: 10px;
+			border-bottom-radius: 5px;
 			cursor: crosshair;
 		}
 		</style>
@@ -24,7 +25,7 @@
 			  crossorigin="anonymous"></script>
 	</head>
 	<body>
-		<canvas id='canvas1' width="1080" height="600" ></canvas>
+		<canvas id='canvas1' width="1296" height="660" ></canvas>
 		<script>
 			//This is the model for the DialogWindow
 			class DialogWindow{
@@ -49,7 +50,7 @@
 						this.clearDialog()
 						
 						var titleBarGradient = this.context.createLinearGradient(this.x,this.y,this.x,this.y + 12)
-						titleBarGradient.addColorStop(0,"orange")
+						titleBarGradient.addColorStop(0,"#3399ff")
 						titleBarGradient.addColorStop(1,"white")
 
 						this.context.fillStyle = titleBarGradient
@@ -65,6 +66,15 @@
 						this.context.strokeText(this.title,this.x + 2, this.y + 10)
 						//Add Minimize Button to TitleBar
 						this.context.strokeText('-', this.x + (this.width - 9),this.y + 9)
+						//Add the Resize Handle at the bottom right of the dialog
+						//this.context.rect(this.x + this.width - 12,this.y + this.height - 12,12,12)
+						//this.context.beginPath();
+						this.context.moveTo(this.x + this.width,this.y + this.height - 12)
+						this.context.lineTo(this.x + this.width - 12,this.y + this.height)
+						this.context.moveTo(this.x + this.width, this.y + this.height - 8)
+						this.context.lineTo(this.x + this.width - 8, this.y + this.height)
+						this.context.moveTo(this.x + this.width, this.y + this.height - 4)
+						this.context.lineTo(this.x + this.width - 4, this.y + this.height)
 						this.context.stroke()
 					}
 				}
@@ -89,7 +99,7 @@
 					this.clearTaskBar()
 					var taskBarGradient = this.context.createLinearGradient(this.x,this.y,this.x,this.y + this.height)
 					taskBarGradient.addColorStop(0,"white")
-					taskBarGradient.addColorStop(1,"orange")
+					taskBarGradient.addColorStop(1,"#3399ff")
 					this.context.fillStyle = taskBarGradient
 					this.context.fillRect(this.x,this.y,this.width,this.canvas.height - this.height)
 					this.context.strokeStyle = '#000'
@@ -155,13 +165,21 @@
     		function clearAndRedraw(canv){
     			//Clear the canvas
     			canv.width = canv.width;
+    			
+    			//Draw the background
+    			var backgroundImage = new Image();
+    			//backgroundImage.src = "http://items.ssrc.org/wp-content/uploads/2016/04/iStock_000086510503_Large-1.jpg";
+    			backgroundImage.src = "https://scontent-dft4-2.xx.fbcdn.net/v/t1.0-9/19748491_1912317315677722_4938234883088178731_n.jpg?oh=af1c26426a3793fff730e6777945d263&oe=5A1C133C"
+    			canv.getContext('2d').drawImage(backgroundImage,0,0,backgroundImage.width, backgroundImage.height,0,0, canv.width, canv.height);
+				
+
     			//Redraw the dialogs
 				for(let dialog = 0;dialog <= dialogs.length; dialog++){
     				if(dialogs[dialog] != undefined){
     					dialogs[dialog].drawDialog()
     				}
     			}
-
+    			//Draw the taskbar
     			taskbar.drawTaskBar();
     		}
     		//Handle Mouse Events on the Canvas
@@ -172,12 +190,16 @@
     					dialogs[dialog].mouseDown = false
     					dialogs[dialog].mouseOffsetLeft = 0
     					dialogs[dialog].mouseOffsetTop = 0
+    					dialogs[dialog].resizing = false
+    					dialogs[dialog].resizingRefX = 0;
+    					dialogs[dialog].resizingRefY = 0;
     				}
     			}    			
     			clearAndRedraw(this)
     		})
     		//Mouse Down
     		$(canv).mousedown(function(e){
+    			//Check for a click on dialog and on the dialogs Minimize button
     			for(let dialog = 0;dialog <= dialogs.length; dialog++){
     				if(dialogs[dialog] != undefined){
     					if(dialogs[dialog].mouseDown == true){
@@ -186,7 +208,7 @@
     						var dialogBoxMinimizeButtonLeft = dialogs[dialog].x + dialogs[dialog].width - 4
     						var dialogBoxMinimizeButtonRight = dialogs[dialog].x + dialogs[dialog].width + 12
     						var dialogBoxMinimizeButtonTop = dialogs[dialog].y - 24
-    						var dialogBoxMinimizeButtonBottom = dialogs[dialog].y + 62
+    						var dialogBoxMinimizeButtonBottom = dialogs[dialog].y + 24
     						var mouseX = e.pageX
     						var mouseY = e.pageY
     						if(mouseX >= dialogBoxMinimizeButtonLeft && mouseX <= dialogBoxMinimizeButtonRight){
@@ -196,6 +218,20 @@
     							}
     						}
 
+
+    						//Check if the click happened at the Resize button
+    						var dialogBoxResizeButtonLeft = dialogs[dialog].x + dialogs[dialog].width - 4
+    						var dialogBoxResizeButtonRight = dialogs[dialog].x + dialogs[dialog].width + 12
+    						var dialogBoxResizeButtonTop = dialogs[dialog].y + dialogs[dialog].height - 24
+    						var dialogBoxResizeButtonBottom = dialogs[dialog].y + dialogs[dialog].height + 12
+    						if(mouseX >= dialogBoxResizeButtonLeft && mouseX <= dialogBoxResizeButtonRight){
+    							if(mouseY >= dialogBoxResizeButtonTop && mouseY <= dialogBoxResizeButtonBottom){
+    								dialogs[dialog].resizing = true
+ 									dialogs[dialog].resizingRefX = dialogs[dialog].x
+ 									dialogs[dialog].resizingRefY = dialogs[dialog].y
+    								console.log(dialogs[dialog].title + ' is being resized.')
+    							}
+    						}
     					}
     				}
     			}
@@ -206,12 +242,23 @@
     				if(dialogs[dialog] != undefined){
     					if(dialogs[dialog].mouseDown == true){
     						//dialog
- 							//Rough Movement
- 							var canvasOffsetLeft = $(this).position().left
-							var canvasOffsetTop = $(this).position().top
- 							dialogs[dialog].x = Number(e.pageX) - Number(canvasOffsetLeft) - Number(dialogs[dialog].mouseOffsetLeft)
- 							dialogs[dialog].y = Number(e.pageY) - Number(canvasOffsetTop) - Number(dialogs[dialog].mouseOffsetTop)
- 							break
+    						if(dialogs[dialog].resizing == true){
+    							//Do Resizing Logic here
+    							var MouseX = e.pageX;
+    							var MouseY = e.pageY;
+    							var newWidth = MouseX - dialogs[dialog].resizingRefX;
+    							var newHeight = MouseY - dialogs[dialog].resizingRefY;
+    							dialogs[dialog].width = newWidth;
+    							dialogs[dialog].height = newHeight;
+
+    						}else{
+	 							//Rough Movement
+	 							var canvasOffsetLeft = $(this).position().left
+								var canvasOffsetTop = $(this).position().top
+	 							dialogs[dialog].x = Number(e.pageX) - Number(canvasOffsetLeft) - Number(dialogs[dialog].mouseOffsetLeft)
+	 							dialogs[dialog].y = Number(e.pageY) - Number(canvasOffsetTop) - Number(dialogs[dialog].mouseOffsetTop)
+	 							break
+	 						}
     					}
     				}
     			}
