@@ -1,9 +1,11 @@
-<!-- Author: 			Aldanis Vigo - aldanisvigo@gmail.com -->
-<!-- Date:	 			August 15th, 2017 -->
-<!-- Title:	 			Fake Ass Windows Using Canvas Cuz Am Bored -->
-<!-- Description: 		Just messin round... -->
-<!-- License:			Free to use, modify with attribution to Aldanis Vigo (Please keep these comments.. :) Thanksabunch! -->
-<!--RESIZEABLE WINDOWS IMPLEMENTATION-->
+<!--
+	Author : 		Aldanis Vigo
+	Date: 			Wednesday, August, 16th 2017
+	Description:	Web Window System using NodeJS
+	Licence: 		Free to use as long as you leave these comments at the top
+	Git Repo:		https://github.com/AldanisVigo/Node/tree/master/CanvasWindowSystem
+					I'll be updating this code on GitHub. Might post it here. Please leave me a like!!! Thank you!!
+-->
 <!DOCTYPE html>
 <html>
 	<head>
@@ -16,7 +18,7 @@
 			border: 1px solid black;
 			border-top-radius: 10px;
 			border-bottom-radius: 5px;
-			cursor: crosshair;
+			cursor: normal;
 		}
 		</style>
 		<script
@@ -27,9 +29,33 @@
 	<body>
 		<canvas id='canvas1' width="1296" height="660" ></canvas>
 		<script>
+			class menuPanel{
+				constructor(x,y,width,height){
+					this.x = x;
+					this.y = y;
+					this.width = width;
+					this.height = height;
+
+				}
+			}
+			class windowCueItem{
+				constructor(title,dialogId,leftBoundary,rightBoundary,topBoundary,bottomBoundary){
+					this.x = leftBoundary
+					this.y = topBoundary
+					this.width = rightBoundary - leftBoundary
+					this.height = bottomBoundary - topBoundary
+					this.leftBoundary = leftBoundary
+					this.rightBoundary = rightBoundary
+					this.topBoundary = topBoundary
+					this.bottomBoundary = bottomBoundary
+					this.dialogId = dialogId
+					this.title = title
+				}
+			}
+
 			//This is the model for the DialogWindow
 			class DialogWindow{
-				constructor(title,x,y,width,height,canvas){
+				constructor(title,did,x,y,width,height,canvas,taskbar){
 					this.x = x
 					this.y = y
 					this.width = width
@@ -37,7 +63,9 @@
 					this.context = canv.getContext('2d')
 					this.canvas = canvas
 					this.title = title
-					this.hidden = false;
+					this.hidden = false
+					this.taskbar = taskbar;
+					this.did = did;
 					this.drawDialog()
 				}
 				clearDialog(){
@@ -76,6 +104,29 @@
 						this.context.moveTo(this.x + this.width, this.y + this.height - 4)
 						this.context.lineTo(this.x + this.width - 4, this.y + this.height)
 						this.context.stroke()
+					}else{
+						//The dialog has been hidden, add it to the windowCue
+						//vendors.filter(vendor => (vendor.Name === "Magenic"));
+						/*var exists = this.taskbar.windowCue.filter(cueItem => (cueItem.title === this.title)) 
+						if(exists != null && exists == false){
+							var new_windowCueItem = new windowCueItem(this.title,this.did,null,null,null,null)
+							this.taskbar.windowCue.push(new_windowCueItem)
+						}*/
+						var isHidden = false;
+						for(var curCueItem = 0;curCueItem < this.taskbar.windowCue.length; curCueItem++){
+							if(this.taskbar.windowCue[curCueItem] != null || this.taskbar.windowCue[curCueItem] != undefined){
+								if(this.taskbar.windowCue[curCueItem].dialogId == this.did){
+									isHidden = true;
+									break;
+								}
+							}else{
+
+							}
+						}	
+						if(isHidden == false){
+							var new_windowCueItem = new windowCueItem(this.title,this.did,null,null,null,null)
+							this.taskbar.windowCue.push(new_windowCueItem)	
+						}	
 					}
 				}
 			}
@@ -88,6 +139,26 @@
 					this.height = height
 					this.canvas = canvas
 					this.context = canvas.getContext('2d')
+
+					//Mouse Down tracking variables
+					this.mouseDown = false;
+					this.mouseDownPosX = null;
+					this.mouseDownPosY = null;
+
+					//Window Cue Tracking Variables
+					this.windowCueLeftBoundary = null
+					this.windowCueRightBoundary = null
+					this.windowCueTopBoundary = null
+					this.windowCueBottomBoundary = null
+					this.windowCue = []
+					
+					//Main Menu Button Tracking Variables
+					this.menuButtonLeftBoundary = null
+					this.menuButtonRightBoundary = null
+					this.menuButtonTopBoundary = null
+					this.menuButtonBottomBoundary = null;
+
+					//Draw itself
 					this.drawTaskBar()
 				}
 				clearTaskBar(){
@@ -104,73 +175,122 @@
 					this.context.fillRect(this.x,this.y,this.width,this.canvas.height - this.height)
 					this.context.strokeStyle = '#000'
 					this.context.rect(this.x,this.y,this.width,this.canvas.height - this.height)
-					this.drawTime();
+					//Draw the window cue
+					this.drawWindowCue()
+					//Draw the menu button
+					this.drawMenuButton()
+					//Draw time last call to context.stroke()
+					this.drawTime()
+				}
+				drawWindowCue(){
+					var windowCueLeftOffset = 70
+					var windowCueRightOffset = 50
+					var windowCueTopOffset = 2
+					var windowCueBottomOffset = 2
+					var windowCueLeftBoundary = this.x + windowCueLeftOffset
+					var windowCueRightBoundary = this.width - windowCueRightOffset
+					var windowCueTopBoundary = this.y + windowCueTopOffset
+					var windowCueBottomBoundary = this.y + this.height - windowCueBottomOffset
+					this.windowCueLeftBoundary = windowCueLeftBoundary
+					this.windowCueRightBoundary = windowCueRightBoundary
+					this.windowCueTopBoundary = windowCueTopBoundary
+					this.windowCueBottomBoundary = windowCueBottomBoundary
+					var windowCueWidth = Number(windowCueRightBoundary) - Number(windowCueLeftBoundary)
+					var windowCueHeight = Number(windowCueBottomBoundary) - Number(windowCueTopBoundary)
+					
+					//Draw a test rectangle around the window cue
+					var windowCueItemBackgroundGradient = this.context.createLinearGradient(windowCueLeftBoundary,windowCueTopBoundary,windowCueLeftBoundary,windowCueBottomBoundary)
+					windowCueItemBackgroundGradient.addColorStop(0,'rgba(139,196,200,20)')
+					windowCueItemBackgroundGradient.addColorStop(1,'rgba(30,30,90,20)')
+					this.context.fillStyle = windowCueItemBackgroundGradient
+					this.context.fillRect(windowCueLeftBoundary,windowCueTopBoundary,windowCueWidth,windowCueHeight)
+
+					//Divide the window cue area between the items available in the windowCue array
+					var cueItemWidth = windowCueWidth / this.windowCue.length
+					var cueItemTopOffset = 2
+					var cueItemBottomOffset = 2
+					var cueItemHeight = windowCueHeight - cueItemTopOffset - cueItemBottomOffset;
+					var cueItemSpacing = 2
+					for(var currentCueItem = 0; currentCueItem < this.windowCue.length; currentCueItem++){
+						if(this.windowCue[currentCueItem] != undefined){
+							var cueItemText = this.windowCue[currentCueItem].title;
+							var cueItemLeftBoundary = windowCueLeftBoundary + (currentCueItem * cueItemWidth)
+							var cueItemRightBoundary = cueItemLeftBoundary + cueItemWidth
+							var cueItemTopBoundary = windowCueTopBoundary + cueItemTopOffset
+							var cueItemBottomBoundary = cueItemTopBoundary + cueItemHeight - cueItemBottomOffset - windowCueBottomOffset
+							var cueItemBackgroundGradient = this.context.createLinearGradient(cueItemLeftBoundary,cueItemTopBoundary,cueItemLeftBoundary,cueItemBottomBoundary)
+							cueItemBackgroundGradient.addColorStop(0,'white');
+							cueItemBackgroundGradient.addColorStop(1,'#3399ff');
+							this.context.fillStyle = cueItemBackgroundGradient
+							if(currentCueItem == 0){
+								this.context.fillRect(cueItemLeftBoundary + cueItemSpacing,cueItemTopBoundary,cueItemWidth - cueItemSpacing * 2,cueItemHeight)
+								this.context.strokeStyle = '#000'
+								//Add Title to cueItem
+								this.context.strokeText(cueItemText,cueItemLeftBoundary + cueItemSpacing + 2, cueItemTopBoundary + (cueItemHeight / 2))
+							}else{
+								this.context.fillRect(cueItemLeftBoundary,cueItemTopBoundary,cueItemWidth - cueItemSpacing,cueItemHeight)
+								this.context.strokeText(cueItemText,cueItemLeftBoundary + 2, cueItemTopBoundary + (cueItemHeight / 2))
+							}
+						}
+					}
+
+
 				}
 				drawTime(){
 					var time = new Date();
 					var minutes = time.getMinutes()
 					if(Number(minutes) < 10){
-						minutes = '0' + minutes;
+						minutes = '0' + minutes
 					}
 					var hours = time.getHours()
 					var seconds = time.getSeconds()
 					if(Number(seconds) < 10){
-						seconds = '0' + seconds;
+						seconds = '0' + seconds
 					}
 					var displaytime = hours + ':' + minutes + ':' + seconds
 					this.context.strokeStyle = '#000'
 					this.context.strokeText(displaytime,this.x + this.width - 45,this.y + this.height / 2 + 4)
-					this.context.stroke()
+					this.context.fill()
+				}
+				drawMenuButton(){
+					var menuButtonWidth = 48
+					var menuButtonHeight = 48
+					this.menuButtonLeftBoundary = 12
+					this.menuButtonRightBoundary = this.menuButtonLeftBoundary + menuButtonWidth
+					this.menuButtonTopBoundary = this.canvas.height - 52
+					this.menuButtonBottomBoundary = this.menuButtonTopBoundary + menuButtonHeight
+
+					var menuBtnImageSrc = 'http://www.thecommentator.com/ckeditor_assets/pictures/280/content_world-globe-icon.png'
+					var menuBtnImage = new Image()
+					menuBtnImage.src = menuBtnImageSrc
+					this.context.beginPath()
+					this.context.drawImage(menuBtnImage,0,0,menuBtnImage.width, menuBtnImage.height,this.menuButtonLeftBoundary,this.menuButtonTopBoundary,menuButtonWidth,menuButtonHeight)
+					this.context.arc(36, this.canvas.height - 52 + 24,22,0,(2.5 * Math.PI))
+					this.context.fillStyle = 'rgba(150,150,255,.5)'
+					
 				}
 			}
 
 			//Make a canvas to draw the dialogs in
 			var canv = document.getElementById('canvas1')
 
-			//Create a couple of dialogs
-			var dialogs = [new DialogWindow("Chat Box",10,10,100,100,canv),new DialogWindow("Chat Two",120,10,100,100,canv)]
-			var taskbar = new TaskBar(0,canv.height - 20,canv.width,20,canv)
-			//Track mousedown position on each dialog object within the canvas
-			$(canv).mousedown(function(e){
-    			for(let dialog = 0;dialog <= dialogs.length; dialog++){
-    				var canvasOffsetLeft = $(this).position().left
-					var canvasOffsetTop = $(this).position().top
-					var mouseOffsetLeft = e.pageX
-					var mouseOffsetTop = e.pageY
-					var offsetLeftFromCanvas = mouseOffsetLeft - canvasOffsetLeft
-					var offsetTopFromCanvas = mouseOffsetTop - canvasOffsetTop
-					var xMousedown = false
-					var yMousedown = false
-					if(dialogs[dialog] != undefined){
-						if((offsetLeftFromCanvas > dialogs[dialog].x) && (offsetLeftFromCanvas < (dialogs[dialog].x + dialogs[dialog].width))){
-								xMousedown = true
-								if(offsetTopFromCanvas > dialogs[dialog].y){
-									if(offsetTopFromCanvas < (dialogs[dialog].y + dialogs[dialog].height)){
-										yMousedown = true
-										if(xMousedown == true){
-											dialogs[dialog].mouseDown = true
-											dialogs[dialog].mouseOffsetLeft = offsetLeftFromCanvas - dialogs[dialog].x;
-											dialogs[dialog].mouseOffsetTop = offsetTopFromCanvas - dialogs[dialog].y;
-											break
-										}
-										break
-									}
-								}
-						}
-					}
-    			}	
-    		})
+			//Create a TaskBar
+			var taskbar = new TaskBar(0,canv.height - 30,canv.width,30,canv)
 
+			//Create a variable to keep track of dialog focus
+			var focusedDialog = null;
+			//Create a couple of dialogs
+			var dialogs = [new DialogWindow("Window 1",0,10,10,400,400,canv,taskbar),new DialogWindow("Window 2",1,500,10,400,400,canv,taskbar),new DialogWindow("Window 3",2,500,10,400,400,canv,taskbar),new DialogWindow("Window 4",3,500,10,400,400,canv,taskbar)]
 
     		function clearAndRedraw(canv){
     			//Clear the canvas
-    			canv.width = canv.width;
+    			canv.width = canv.width
     			
     			//Draw the background
-    			var backgroundImage = new Image();
+    			var backgroundImage = new Image()
     			//backgroundImage.src = "http://items.ssrc.org/wp-content/uploads/2016/04/iStock_000086510503_Large-1.jpg";
-    			backgroundImage.src = "https://scontent-dft4-2.xx.fbcdn.net/v/t1.0-9/19748491_1912317315677722_4938234883088178731_n.jpg?oh=af1c26426a3793fff730e6777945d263&oe=5A1C133C"
-    			canv.getContext('2d').drawImage(backgroundImage,0,0,backgroundImage.width, backgroundImage.height,0,0, canv.width, canv.height);
+    			backgroundImage.src = "https://nodejs.org/static/images/logos/nodejs-2560x1440.png"
+    			canv.getContext('2d').drawImage(backgroundImage,0,0,backgroundImage.width, backgroundImage.height,0,0, canv.width, canv.height)
 				
 
     			//Redraw the dialogs
@@ -182,6 +302,17 @@
     			//Draw the taskbar
     			taskbar.drawTaskBar();
     		}
+
+    		//Utility function to clean empty elements from array
+    		function cleanArray(actual) {
+			  var newArray = new Array();
+			  for (var i = 0; i < actual.length; i++) {
+			    if (actual[i]) {
+			      newArray.push(actual[i]);
+			    }
+			  }
+			  return newArray;
+			}
     		//Handle Mouse Events on the Canvas
     		//Mouse Up
     		$(canv).mouseup(function(){
@@ -191,66 +322,185 @@
     					dialogs[dialog].mouseOffsetLeft = 0
     					dialogs[dialog].mouseOffsetTop = 0
     					dialogs[dialog].resizing = false
-    					dialogs[dialog].resizingRefX = 0;
-    					dialogs[dialog].resizingRefY = 0;
+    					dialogs[dialog].resizingRefX = 0
+    					dialogs[dialog].resizingRefY = 0
     				}
-    			}    			
+    			}    	
+    			if(taskbar.mouseDown == true){
+    				//Check which one got clicked
+    				var distanceFromLeftOfWindowCue = taskbar.mouseDownPosX - taskbar.windowCueLeftBoundary
+    				var windowCueWidth = taskbar.windowCueRightBoundary - taskbar.windowCueLeftBoundary
+    				var windowCueLength = taskbar.windowCue.length
+    				var widthOfCueItem = windowCueWidth / windowCueLength
+    				console.log("Number of items in the window cue:" + windowCueLength)
+    				if(windowCueLength == 1){
+    					if(taskbar.windowCue[0] != null){
+	    					//There's only one item in the cue, and we clicked it
+	    					var itemDialogId = taskbar.windowCue[0].dialogId
+	    					console.log("Expanding:" + itemDialogId)
+	    					for(var currentDialog = 0; currentDialog < dialogs.length; currentDialog++){
+	    						if(Number(dialogs[currentDialog].did) == Number(itemDialogId)){
+	    							dialogs[currentDialog].hidden = false
+	    							dialogs[currentDialog].drawDialog()
+	    						}
+	    					}
+	    					//Clear it from the window cue
+	    					//taskbar.windowCue.splice(0)
+	    					delete taskbar.windowCue[0]
+	    					taskbar.windowCue = cleanArray(taskbar.windowCue)
+	    				}
+    				}else{
+    					var itemNumber = Math.floor(distanceFromLeftOfWindowCue / widthOfCueItem) - 1
+    					console.log('Clicking on item number ' + itemNumber)
+    					if(taskbar.windowCue[itemNumber + 1] != undefined){
+    						var itemDialogId = taskbar.windowCue[itemNumber + 1].dialogId
+	    					console.log("Expanding:" + itemDialogId)
+	    					for(var currentDialog = 0; currentDialog < dialogs.length; currentDialog++){
+	    						if(Number(dialogs[currentDialog].did) == Number(itemDialogId)){
+	    							dialogs[currentDialog].hidden = false
+	    							dialogs[currentDialog].drawDialog()
+	    						}
+	    					}
+	    					//Clear it from the window cue
+	    					delete taskbar.windowCue[itemNumber + 1]
+	    					taskbar.windowCue = cleanArray(taskbar.windowCue)
+	    				}	
+    				}
+    				taskbar.mouseDown = false
+    				taskbar.mouseDownPosX = null
+    				taskbar.mouseDownPosY = null
+    			}		
     			clearAndRedraw(this)
     		})
     		//Mouse Down
     		$(canv).mousedown(function(e){
-    			//Check for a click on dialog and on the dialogs Minimize button
+				var mouseOffsetLeft = e.pageX
+				var mouseOffsetTop = e.pageY
+				//Track mousedown position on each dialog object within the canvas
+    			for(let dialog = dialogs.length;dialog >= 0; dialog--){
+    				var canvasOffsetLeft = $(this).position().left
+					var canvasOffsetTop = $(this).position().top
+					var offsetLeftFromCanvas = mouseOffsetLeft - canvasOffsetLeft
+					var offsetTopFromCanvas = mouseOffsetTop - canvasOffsetTop
+					var xMousedown = false
+					var yMousedown = false
+					if(dialogs[dialog] != undefined){
+
+
+						//Swap Focus 
+						if((offsetLeftFromCanvas > dialogs[dialog].x) && (offsetLeftFromCanvas < (dialogs[dialog].x + dialogs[dialog].width))){
+								xMousedown = true
+								if(offsetTopFromCanvas > dialogs[dialog].y){
+									if(offsetTopFromCanvas < (dialogs[dialog].y + dialogs[dialog].height)){
+										yMousedown = true
+										if(xMousedown == true){
+											if(dialogs[dialog].hidden != true){
+												dialogs[dialog].mouseDown = true
+												dialogs[dialog].mouseOffsetLeft = offsetLeftFromCanvas - dialogs[dialog].x
+												dialogs[dialog].mouseOffsetTop = offsetTopFromCanvas - dialogs[dialog].y
+												
+												//Check for Minimize Button Click
+												if(dialogs[dialog].mouseDown == true){
+						    						console.log(dialogs[dialog].title + " was clicked at X:" + dialogs[dialog].mouseOffsetLeft + " Y:" + dialogs[dialog].mouseOffsetTop)
+						    						//Check if the click happened at the Minimize button
+						    						var dialogBoxMinimizeButtonLeft = dialogs[dialog].x + dialogs[dialog].width - 4
+						    						var dialogBoxMinimizeButtonRight = dialogs[dialog].x + dialogs[dialog].width + 12
+						    						var dialogBoxMinimizeButtonTop = dialogs[dialog].y - 24
+						    						var dialogBoxMinimizeButtonBottom = dialogs[dialog].y + 24
+						    						var mouseX = e.pageX
+						    						var mouseY = e.pageY
+						    						if(mouseX >= dialogBoxMinimizeButtonLeft && mouseX <= dialogBoxMinimizeButtonRight){
+						    							if(mouseY >= dialogBoxMinimizeButtonTop && mouseY <= dialogBoxMinimizeButtonBottom){
+
+						    								dialogs[dialog].hidden = true
+						    								dialogs[dialog].clearDialog()
+						    								break
+						    							}
+						    						}
+
+						    						//Check if the click happened at the Resize button
+						    						var dialogBoxResizeButtonLeft = dialogs[dialog].x + dialogs[dialog].width - 4
+						    						var dialogBoxResizeButtonRight = dialogs[dialog].x + dialogs[dialog].width + 12
+						    						var dialogBoxResizeButtonTop = dialogs[dialog].y + dialogs[dialog].height - 24
+						    						var dialogBoxResizeButtonBottom = dialogs[dialog].y + dialogs[dialog].height + 12
+						    						if(mouseX >= dialogBoxResizeButtonLeft && mouseX <= dialogBoxResizeButtonRight){
+						    							if(mouseY >= dialogBoxResizeButtonTop && mouseY <= dialogBoxResizeButtonBottom){
+						    								dialogs[dialog].resizing = true
+						 									dialogs[dialog].resizingRefX = dialogs[dialog].x
+						 									dialogs[dialog].resizingRefY = dialogs[dialog].y
+						    								console.log(dialogs[dialog].title + ' is being resized.')
+						    							}
+						    						}
+						    					}
+							    				
+							    				//Set the focused dialog
+												var previouslyFocusedDialog = focusedDialog
+												if(previouslyFocusedDialog == null){
+													focusedDialog = dialogs[dialog]
+												}else{
+													focusedDialog = dialogs[dialog]
+													//Swap the two
+													for(var curDialog = 0;curDialog < dialogs.length; curDialog++){
+														if(dialogs[curDialog] == focusedDialog){
+															dialogs[curDialog] = previouslyFocusedDialog
+															dialogs[dialogs.length] = focusedDialog
+															break
+														}
+													}
+												}
+												break
+											}else{
+												console.log("Mouse Down on Hidden Dialog " + dialogs[dialog].title)
+												continue
+											}
+										}
+										break
+									}
+								}
+						}
+					}
+    			}	
+
+				//Check for a click on dialog and on the dialogs Minimize button
     			for(let dialog = 0;dialog <= dialogs.length; dialog++){
     				if(dialogs[dialog] != undefined){
-    					if(dialogs[dialog].mouseDown == true){
-    						console.log(dialogs[dialog].title + " was clicked at X:" + dialogs[dialog].mouseOffsetLeft + " Y:" + dialogs[dialog].mouseOffsetTop)
-    						//Check if the click happened at the Minimize button
-    						var dialogBoxMinimizeButtonLeft = dialogs[dialog].x + dialogs[dialog].width - 4
-    						var dialogBoxMinimizeButtonRight = dialogs[dialog].x + dialogs[dialog].width + 12
-    						var dialogBoxMinimizeButtonTop = dialogs[dialog].y - 24
-    						var dialogBoxMinimizeButtonBottom = dialogs[dialog].y + 24
-    						var mouseX = e.pageX
-    						var mouseY = e.pageY
-    						if(mouseX >= dialogBoxMinimizeButtonLeft && mouseX <= dialogBoxMinimizeButtonRight){
-    							if(mouseY >= dialogBoxMinimizeButtonTop && mouseY <= dialogBoxMinimizeButtonBottom){
-    								dialogs[dialog].hidden = true
-    								dialogs[dialog].clearDialog()
-    							}
-    						}
-
-
-    						//Check if the click happened at the Resize button
-    						var dialogBoxResizeButtonLeft = dialogs[dialog].x + dialogs[dialog].width - 4
-    						var dialogBoxResizeButtonRight = dialogs[dialog].x + dialogs[dialog].width + 12
-    						var dialogBoxResizeButtonTop = dialogs[dialog].y + dialogs[dialog].height - 24
-    						var dialogBoxResizeButtonBottom = dialogs[dialog].y + dialogs[dialog].height + 12
-    						if(mouseX >= dialogBoxResizeButtonLeft && mouseX <= dialogBoxResizeButtonRight){
-    							if(mouseY >= dialogBoxResizeButtonTop && mouseY <= dialogBoxResizeButtonBottom){
-    								dialogs[dialog].resizing = true
- 									dialogs[dialog].resizingRefX = dialogs[dialog].x
- 									dialogs[dialog].resizingRefY = dialogs[dialog].y
-    								console.log(dialogs[dialog].title + ' is being resized.')
-    							}
-    						}
-    					}
+    					//Test
     				}
     			}
+
+    			//Track mousedown position on the taskbar windowCue
+    			if((mouseOffsetLeft > taskbar.windowCueLeftBoundary) && (mouseOffsetLeft < taskbar.windowCueRightBoundary)){
+    				if((mouseOffsetTop > taskbar.windowCueTopBoundary) && (mouseOffsetTop < taskbar.windowCueBottomBoundary)){
+    					taskbar.mouseDown = true
+    					taskbar.mouseDownPosX = mouseOffsetLeft
+    					taskbar.mouseDownPosY = mouseOffsetTop
+    				}
+    			}
+
+
+    			//Track mousedown position on the taskbar menu button
+
     		})
     		//Mouse Move
     		$(canv).mousemove(function(e){
     			for(let dialog = 0;dialog <= dialogs.length; dialog++){
-    				if(dialogs[dialog] != undefined){
+    				if(dialogs[dialog] != undefined && dialogs[dialog].hidden == false){
     					if(dialogs[dialog].mouseDown == true){
     						//dialog
     						if(dialogs[dialog].resizing == true){
     							//Do Resizing Logic here
-    							var MouseX = e.pageX;
-    							var MouseY = e.pageY;
-    							var newWidth = MouseX - dialogs[dialog].resizingRefX;
-    							var newHeight = MouseY - dialogs[dialog].resizingRefY;
-    							dialogs[dialog].width = newWidth;
-    							dialogs[dialog].height = newHeight;
-
+    							var MouseX = e.pageX
+    							var MouseY = e.pageY
+    							var newWidth = MouseX - dialogs[dialog].resizingRefX
+    							var newHeight = MouseY - dialogs[dialog].resizingRefY
+    							var minWidth = dialogs[dialog].title.length * 9
+    							var minHeight = 24
+    							if(newWidth > minWidth){
+    								dialogs[dialog].width = newWidth
+    							}
+    							if(newHeight > minHeight){
+    								dialogs[dialog].height = newHeight
+    							}
     						}else{
 	 							//Rough Movement
 	 							var canvasOffsetLeft = $(this).position().left
@@ -268,7 +518,7 @@
     		//Update the time on the taskbar every 50mS
     		setInterval(function(){
     			taskbar.drawTaskBar()
-    		},500)
+    		},900)
 
 		</script>
 	</body>
