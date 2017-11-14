@@ -1,0 +1,20 @@
+body{
+	background: grey;
+}
+#register_title{
+	color: white;
+	margin: auto;
+	text-align: center;
+}
+#registration-form{
+	border: 1px solid black;
+	padding: 20px;
+	display: block;
+	width: 172px;
+	margin: auto;
+	border-radius: 20px;
+	margin-top: 40px;
+	box-shadow:0px 0px 10px 5px black;
+	background: linear-gradient(to top,white, grey, white);
+}
+

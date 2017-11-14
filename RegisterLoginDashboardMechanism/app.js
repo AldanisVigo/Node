@@ -31,7 +31,8 @@ app.use(session({
 	saveUninitialized: true,
 	resave: true,
 	cookie: {
-		maxAge: 5 * 60 * 1000
+		maxAge: 5 * 60 * 60 * 1000,
+		secure: false
 	}
 }))
 
@@ -60,25 +61,28 @@ app.get('/', (req,res)=>{
 		var success = req.query.msg
 		res.render("login",{
 			email: email,
-			success: success
+			success: success,
+			view: 'login'
 		})
 	}else if(requestedView == 'dashboard'){
 		res.render("dashboard",{
 			email: req.session.email,
 			expires: req.session.expiration,
 			sessionToken: req.session.sessionToken,
-			sessionCookieExpiration: ((req.session.cookie.maxAge / 1000) / 60)
+			view: 'dashboard'
 		})
 	}else{
 		//By default send to the register route
-		res.redirect('/register');
+		res.render('register',{
+			view: 'register'
+		})
 	}
 })
 
-//Registration view route
-app.get('/register', (req,res)=>{
-	res.render('register')
-})
+// //Registration view route
+// app.get('/register', (req,res)=>{
+// 	res.render('register')
+// })
 
 //Registration process route
 app.post('/process/registration', (req,res)=>{
@@ -282,6 +286,13 @@ function generateNonce(email,postgresql_client){
 		expires: timeStamp
 	}
 }
+//Route to process logout requests
+app.post('/process/logout', (req, res)=>{
+	req.session.destroy();
+	res.json({
+		redirect: '/?view=login'
+	})
+})
 //Route to process login requests
 app.post('/process/login', (req,res)=>{
 	//Retrieve the encrypted email and password

@@ -10,5 +10,15 @@
 		<script src="js/bower_components/jsencrypt/bin/jsencrypt.min.js"></script>
 		<!--Validate.js-->
 		<script src="js/bower_components/validate/validate.min.js"></script>
-	</head>
-	<body>
+		<!--Dashboard Stylesheet-->
+		<%if(view != undefined){%>
+			<%if(view == 'login'){%>
+				<link rel="stylesheet" type="text/css" href="css/login.css">
+			<%}else if(view == 'dashboard'){%>
+				<link rel="stylesheet" type="text/css" href="css/dashboard.css">
+			<%}else{%>
+				<link rel="stylesheet" type="text/css" href="css/register.css">
+			<%}%>
+		<%}else{%>
+			<link rel="stylesheet" type="text/css" href="css/register.css">
+		<%}%>

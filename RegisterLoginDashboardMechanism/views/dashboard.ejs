@@ -1,21 +1,50 @@
 <% include parts/header %>
-	<h1>Dashboard</h1>
-	<br/>
-	<div>
-		<!--REGISTRATION SUCCESS MESSAGE-->
-		<% if(email != undefined){ %>
-			Logged in as: <%= email %><br><br>
-		<%}%>
+	<div id="outter_wrapper">
+		<div id="dashboard_title">&nbsp;&nbsp;Dashboard
+			<img src='img/logout.png' id='logout_img'/>
+		</div>
+		<div id="dashboard_wrapper">
+			<!--REGISTRATION SUCCESS MESSAGE-->
+			<% if(email != undefined){ %>
+				Logged in as: <%= email %><br><br>
+			<%}else{%>
+				No email variable detected.
+			<%}%>
 
-		<%if(sessionToken != undefined){%>
-			Your session token is: <%= sessionToken %><br><br>
-		<%}%>
+			<%if(sessionToken != undefined){%>
+				Your session token is: <%= sessionToken %><br><br>
+			<%}%>
 
-		<%if(expires != undefined){%>
-			Your session token will expire at: <%= new Date(expires)%><br><br>
-		<%}%>
-		
-		<%if(sessionCookieExpiration != undefined){%>
-			Your session cookie will expire in approximately: <%= sessionCookieExpiration %> hours<br><br>
-		<%}%>
+			<%if(expires != undefined){%>
+				Your session token will expire at: <%= new Date(expires)%><br><br>
+			<%}%>
+		</div>
+	</div>
+	<script>
+		$(document).ready(()=>{
+			$('#logout_img').click(()=>{
+				alert("Logged out!");
+				$.ajax({
+					url: '/process/logout',
+					type: 'POST',
+					dataType: 'json',
+					success:(data,status, error)=>{
+						if(typeof data.redirect == 'string'){
+							window.location=data.redirect
+						}
+					}
+				})
+				.done(function() {
+					console.log("success");
+				})
+				.fail(function() {
+					console.log("error");
+				})
+				.always(function() {
+					console.log("complete");
+				});
+				
+			})
+		})
+	</script>
 <% include parts/footer %>
