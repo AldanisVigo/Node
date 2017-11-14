@@ -1,0 +1,235 @@
+<% include parts/header %>
+	<!--ALERT SERVERSIDE ERRORS-->
+	<!--ERRORS OUTPUT-->
+	<script>
+		var errors = null
+		<% if(errors != undefined){ %>
+			<% errors.forEach(function(error){ %>
+				errors += "\n<%= error.msg %>";				
+			<% }) %>
+		<% } %>	
+		if(errors != null){
+			alert("Errors:\n\n" + errors);
+		}
+	</script>
+
+
+	<h1>Register</h1>
+	<div id="registration-form">
+		<div class="messages"></div>
+		<label>First Name:</label><br>
+		<input type="text" id="fname" name="fname" value=
+			<% if(user != undefined) { %> 
+				'<%= user.fname %>' 
+			<%}else{%>
+				''
+			<%}%>
+		/><br>
+		<label>Last Name:</label><br>
+		<input type="text" id="lname" name="lname" value=
+			<% if(user != undefined) { %> 
+				'<%= user.lname %>' 
+			<%}else{%>
+				''
+			<%}%>
+		/><br>
+		<label>Email:</label><br/>
+		<input type="email" id="email" name="email" value=
+			<% if(user != undefined) { %> 
+				'<%= user.email %>' 
+			<%}else{%>
+				''
+			<%}%>
+		/><br>
+		<label>Confirm Email:</label><br>
+		<input type="email" id="emailconf" name="emailconf" value=
+			<% if(user != undefined) { %> 
+				'<%= user.emailconf %>' 
+			<%}else{%>
+				''
+			<%}%>
+		/><br>
+		<label>Password:</label><br>
+		<input type="password" id="password" name="password" value=
+			<% if(user != undefined) { %> 
+				'<%= user.password %>' 
+			<%}else{%>
+				''
+			<%}%>
+		/><br>
+		<label>Confirm Password:</label><br>
+		<input type="password" id="passwordconf" name="passwordconf" value=
+			<% if(user != undefined) { %> 
+				'<%= user.passwordconf %>' 
+			<%}else{%>
+				''
+			<%}%>
+		/><br><br><br>
+		<input type="submit" id="registerBtn" name="registerBtn" value="Register"/> 
+	</div>
+	<script type="text/javascript">
+		//Function to perform client side field validation
+		function validate_input(){
+			/*
+				TODO: Use the Validate.js client side library to validate all fields. Return true if valid, false if not valid
+			 */
+			//Create the validator constraints
+			var validation_constraints = {
+				fname: {
+					presence: true,
+					length:{
+						minimum: 1,
+						maximum: 30,
+						message: "^The first name must be between 1 and 30 character in length"
+					}
+				},
+				lname: {
+					presence: true,
+					length:{
+						minimum: 1,
+						maximum: 30,
+						message: "^The last name must be between 1 and 30 characters in length"
+					}
+				},
+				email: {
+					presence: true,
+					email: {
+						message: "^The email you entered is not a valid email"
+					},
+				},
+				emailconf: {
+					presence: true,
+					email: {
+						message: "^The email confirmation is not a valid email"
+					},
+					equality: {
+						attribute: "email",
+						message: "^The emails don't match"
+					}
+				},
+				password: {
+					presence: true,
+					length: {
+						minimum: 5,
+						message: "^The password must be at least 5 characters long"
+					}
+				},
+				passwordconf: {
+					presence: true,
+					length: {
+						minimum: 5,
+						message: "^The confirmation password must be at least 5 characters long"
+					},
+					equality: {
+						attribute: "password",
+						message: "^The passwords don't match"
+					}
+				}
+			}
+
+			//Call the validate function and retrieve the results
+			var validation_results = validate({
+				fname: $('#fname').val(),
+				lname: $('#lname').val(),
+				email: $('#email').val(),
+				emailconf: $('#emailconf').val(),
+				password: $('#password').val(),
+				passwordconf: $('#passwordconf').val()
+			}, validation_constraints, {
+				format: "flat"
+			})
+			
+			//Then based on the results of the validate function return true or false
+			if(!validation_results){
+				console.log("The input is valid")
+				return true
+			}else{
+				console.log(validation_results)
+				//Clear the messages
+				$('.messages').empty()
+				$('.messages').append("<h3><b>Errors</b></h3>")
+				//Fill it in again
+				for (var error in validation_results){
+				  	$('.messages').append(validation_results[error] + "<br/>")
+				}
+				$('.messages').append('<br/><br/>')
+				$('.messages').css('color','red')
+				return false
+			}
+		}
+
+		let public_rsa_key = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3f0JdSs/yTdY7aZ5jyE5
+rJEM9jLvO6pDxt0VtJoCM/cjwak4Nc9V9rVeLVflnSX3pWC7WMy5W3X08llBGOq1
+fuwptC6pl0rxxxBgdCNXYmWxxn5VA2leuuU7t7K1cgxi7/6w1AGFNp0UMYgvfeQ9
+PylBGUT2wGzhpDVwmDrRZQGFHI0N3KL8mgI0YoUByb/U91kTVJnUrZ1JCcNPB4vt
+9/eUY1Ie4cgOz1Oxo857E1zxy7WOEm2o794tTNhfrIvyUKvG0fNahneeMS3qrrn7
+vvosEl7PJaGQAZtNJZv6+q1mKfmNYyUWIR71CcEhh1z8q8btwBl29cQ8+MuiLcF6
+YQIDAQAB
+-----END PUBLIC KEY-----`
+		
+		$(document).ready(function() {
+			$('#registerBtn').click(function(event) {
+				if(validate_input() != false){
+					//Create an instance of JSEncrypt
+					var encrypt = new JSEncrypt()
+					//Set the public key for encryption
+					encrypt.setPublicKey(public_rsa_key)
+					//Get the first name from the fname field
+					var fname = $('#fname').val()
+					//Get the last name from the lname field
+					var lname = $('#lname').val()
+					//Get the password from the password field
+					var password = $('#password').val()
+					//Get the email from the email field
+					var email = $('#email').val()
+					//Get the email confirmation from the emailconf field
+					var emailconf = $('#emailconf').val()
+					//Get the password confirmation from the passwordconf field
+					var passwordconf = $('#passwordconf').val()
+					//Encrypt them using JSEncrypt
+					var encrypted_fname = encrypt.encrypt(fname)
+					var encrypted_lname = encrypt.encrypt(lname)
+					var encrypted_password = encrypt.encrypt(password)
+					var encrypted_email = encrypt.encrypt(email)
+					var encrypted_passwordconf = encrypt.encrypt(passwordconf)
+					var encrypted_emailconf = encrypt.encrypt(emailconf)
+					//Log the encrypted version of the password and email
+					console.log("Sending the following encrypted data through ajax post request:\n\n")
+					console.log("Encrypted First Name:\n" + encrypted_fname + "\n\n")
+					console.log("Encrypted Last Name:\n" + encrypted_lname + "\n\n")
+					console.log("Encrypted Email:\n" + encrypted_email + "\n\n")
+					console.log("Encrypted Confirmation Email:\n" + encrypted_emailconf + "\n\n")
+					console.log("Encrypted Password:\n" + encrypted_password + "\n\n")
+					console.log("Encrypted Confirmation Password:\n" + encrypted_passwordconf + "\n\n")
+					//Create an ajax request and pass the encrypted password and email to the 
+					$.ajax({
+							url: '/process/registration',
+							type: 'POST',
+							dataType: 'json',
+							data: {
+								fname: encrypted_fname,
+								lname: encrypted_lname,
+								email: encrypted_email,
+								password: encrypted_password,
+								passwordconf: encrypted_passwordconf,
+								emailconf: encrypted_emailconf
+							},
+							success: function(data, status, error){
+								if(typeof data.redirect == 'string'){
+									window.location = data.redirect
+								}
+							}
+						}).done(function(data, text) {
+							console.log("Registration Request Response")
+							console.log(data)
+						}).fail(function(data, status, error) {
+							console.log("error:" + error.Message)
+						}).always(function(data, status, error){
+							console.log("Registration request complete")
+						})
+				}
+			})
+		})
+	</script>
+<% include parts/footer %>

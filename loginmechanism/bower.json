@@ -1,0 +1,24 @@
+{
+  "name": "towproapplogin",
+  "authors": [
+    "Aldanis Vigo <aldanisvigo@gmail.com>"
+  ],
+  "description": "This is a login application example",
+  "main": "",
+  "license": "ISC",
+  "homepage": "",
+  "private": true,
+  "ignore": [
+    "**/.*",
+    "node_modules",
+    "bower_components",
+    "test",
+    "tests"
+  ],
+  "dependencies": {
+    "jquery": "^3.2.1",
+    "jsencrypt": "^2.3.0",
+    "validate": "validate.js#^0.12.0",
+    "jquery-ui": "^1.12.1"
+  }
+}

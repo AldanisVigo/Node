@@ -1,0 +1,80 @@
+<% include parts/header %>
+	<h1>Login</h1>
+	<div>
+		<!--REGISTRATION SUCCESS MESSAGE-->
+		<% if(success != undefined){ %>
+			<%= success %><br><br>
+		<%}%>
+	</div>
+	<div id="login_form">
+		<label>Email:</label><br>
+		<input type="email" id="email" name="email" value=
+			<% if(email != undefined){ %>
+				<%= email %>
+			<%}else{%>
+				''
+			<%}%>
+		/><br>
+		<label>Password:</label><br>
+		<input type="password" id="password" name="password"/><br>
+		<input type="submit" id="btnLogin" name="btnLogin" value="Login"/>
+	</div>
+	<script type="text/javascript">
+		let public_rsa_key = `-----BEGIN PUBLIC KEY-----
+MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3f0JdSs/yTdY7aZ5jyE5
+rJEM9jLvO6pDxt0VtJoCM/cjwak4Nc9V9rVeLVflnSX3pWC7WMy5W3X08llBGOq1
+fuwptC6pl0rxxxBgdCNXYmWxxn5VA2leuuU7t7K1cgxi7/6w1AGFNp0UMYgvfeQ9
+PylBGUT2wGzhpDVwmDrRZQGFHI0N3KL8mgI0YoUByb/U91kTVJnUrZ1JCcNPB4vt
+9/eUY1Ie4cgOz1Oxo857E1zxy7WOEm2o794tTNhfrIvyUKvG0fNahneeMS3qrrn7
+vvosEl7PJaGQAZtNJZv6+q1mKfmNYyUWIR71CcEhh1z8q8btwBl29cQ8+MuiLcF6
+YQIDAQAB
+-----END PUBLIC KEY-----`
+		
+		$(document).ready(function() {
+			$('#btnLogin').click(function(event) {
+				//Create an instance of JSEncrypt
+				var encrypt = new JSEncrypt()
+				//Set the public key for encryption
+				encrypt.setPublicKey(public_rsa_key)
+				//Get the password from the password field
+				var password = $('#password').val()
+				//Get the email from the email field
+				var email = $('#email').val()
+				//Encrypt them using JSEncrypt
+				var encrypted_password = encrypt.encrypt(password)
+				var encrypted_email = encrypt.encrypt(email)
+				//Log the encrypted version of the password and email
+				console.log("Encrypted Email:\n" + encrypted_email)
+				console.log("Encrypted Password:\n" + encrypted_password)
+				//Create an ajax request and pass the encrypted password and email to the 
+				$.ajax({
+						url: '/process/login',
+						type: 'POST',
+						dataType: 'json',
+						data: {
+							email: encrypted_email,
+							password: encrypted_password
+						},
+						success: function(data, status, error){
+							if(typeof data.msg == 'string'){
+								alert("Recieved message:" + data.msg)
+								if(typeof data.redirect == 'string'){
+									//alert(data.redirect)
+									window.location = data.redirect
+								}
+							}
+						}
+					})
+					.done(function(data, text) {
+						
+					})
+					.fail(function(request, status, error) {
+						console.log(error)
+					})
+					.always(function(request, status, error){
+						console.log("Login request complete")
+					})
+			})
+		})
+	</script>
+<% include parts/footer %>

@@ -1,0 +1,21 @@
+<% include parts/header %>
+	<h1>Dashboard</h1>
+	<br/>
+	<div>
+		<!--REGISTRATION SUCCESS MESSAGE-->
+		<% if(email != undefined){ %>
+			Logged in as: <%= email %><br><br>
+		<%}%>
+
+		<%if(sessionToken != undefined){%>
+			Your session token is: <%= sessionToken %><br><br>
+		<%}%>
+
+		<%if(expires != undefined){%>
+			Your session token will expire at: <%= new Date(expires)%><br><br>
+		<%}%>
+		
+		<%if(sessionCookieExpiration != undefined){%>
+			Your session cookie will expire in approximately: <%= sessionCookieExpiration %> hours<br><br>
+		<%}%>
+<% include parts/footer %>

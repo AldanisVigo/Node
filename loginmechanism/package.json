@@ -1,0 +1,35 @@
+{
+  "name": "towproapp",
+  "version": "1.0.0",
+  "description": "This is a login mechanism created in node",
+  "main": "app.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "nodemon app.js",
+    "postinstall": "bower install"
+  },
+  "author": "Aldanis Vigo",
+  "license": "Proprietary License",
+  "dependencies": {
+    "body-parser": "^1.18.2",
+    "bower": "^1.8.2",
+    "crypto": "^1.0.1",
+    "dotenv": "^4.0.0",
+    "ejs": "^2.5.7",
+    "express": "^4.16.2",
+    "express-validator": "^4.3.0",
+    "fs": "0.0.1-security",
+    "jsencrypt": "^2.3.1",
+    "mysql": "^2.15.0",
+    "nodemon": "^1.12.1",
+    "pg": "7.4.0",
+    "ursa": "^0.9.4",
+    "validator": "^9.1.1",
+    "yav": "^0.1.0",
+    "express-session": "*"
+  },
+  "engines": {
+    "node": "9.1.0",
+    "npm": "4.1.2"
+  }
+}
