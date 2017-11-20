@@ -1,0 +1,4 @@
+You need to create a .env file with the following variables
+
+DATABASE_URL=pg:\\DBUSER:DBPASSWORD@localhost:PORT#\DBNAME
+PORT=SERVERPORT#
