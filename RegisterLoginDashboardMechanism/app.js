@@ -286,6 +286,28 @@ function generateNonce(email,postgresql_client){
 		expires: timeStamp
 	}
 }
+//Route for adding a recipe
+app.post('/process/addRecipe', (req,res)=>{
+	var recipeName = req.body.recipeName
+	var recipeDescription = req.body.recipeDescription
+	var response = "";
+	//Add to the database
+	if(recipeName == ""){
+		response += "You need to include a name for this recipe."
+	}
+	if(recipeDescription == ""){
+		response += "\nYou need to include a description for this recipe."
+	}
+	if(response == ""){
+		//Add the recipe to the database
+
+		//Respond with a success message
+		res.json({response: 'Thank you for sharing this recipe'})
+	}else{
+		//Send the response back
+		res.json({response: response})
+	}
+})
 //Route to process logout requests
 app.post('/process/logout', (req, res)=>{
 	req.session.destroy();

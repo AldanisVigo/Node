@@ -15,6 +15,7 @@ body{
 #dashboard_title{
 	color: white;
 	font-size: large;
+	font-weight: bold;
 	margin: auto;
 	border: 1px solid black;
 	border-bottom: 0px;
@@ -43,4 +44,25 @@ body{
 #logout_img:hover{
 	filter: gray;
 	-webkit-filter: grayscale(100%);
+}
+#recipe_table{
+	width: 50%;
+	margin: auto;
+}
+#recipe_description{
+	width:100%;
+	height:200px;
+}
+#recipe_panel{
+	width: 100%;
+	border: 1px solid black;
+}
+.textinput{
+	width: 100%;
+}
+label{
+	font-weight: bold;
+}
+.label_cell{
+	width: 200px;
 }

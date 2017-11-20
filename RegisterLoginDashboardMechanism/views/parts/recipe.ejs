@@ -1,0 +1,49 @@
+<div div='recipe_panel'>
+	<table id="recipe_table">
+		<tr>
+			<td colspan="2">
+				<h2>Recipes</h2>
+			</td>
+		</tr>
+		<tr>
+			<td class='label_cell'><label>Recipe Name:</label></td>
+			<td><input class='textinput' type="text" name="recipe_name" id="recipe_name"/>
+		</tr>
+		<tr>
+			<td class='label_cell' style="vertical-align: top;"><label>Recipe Description:</label></td>
+			<td><textarea name="recipe_description" id="recipe_description"></textarea>
+		</tr>
+		<tr>
+			<td colspan="2">
+				<center><input id="addRecipeBtn" name="addRecipeBtn" type="button" value="Add Recipe"/></center>
+			</td>
+		</tr>
+	</table>
+	<script>
+		$('#addRecipeBtn').click(()=>{
+			$$.ajax({
+				url: '/process/addRecipe',
+				type: 'POST',
+				dataType: 'json',
+				data: {
+					recipeName: $('#recipe_name').value,
+					recipeDescription: $('#recipe_description').value
+				},
+				success: (data,status,error)=>{
+					if(typeof data.response == 'string'){
+						alert(data.response)
+					}
+				}
+			})
+			.done(()=>{
+				console.log("success");
+			})
+			.fail(()=>{
+				console.log("error");
+			})
+			.always(()=>{
+				console.log("complete");
+			});
+		})
+	</script>
+</div>
