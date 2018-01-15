@@ -4,7 +4,8 @@
   "description": "This is a websocket chatting/IM application",
   "main": "app.js",
   "scripts": {
-    "start": "node app.js"
+    "start": "node app.js",
+    "postinstall": "cd public/js && npm install"
   },
   "author": "Aldanis Vigo",
   "license": "ISC",
