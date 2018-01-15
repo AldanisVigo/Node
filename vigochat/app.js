@@ -2,7 +2,9 @@ var express = require('express')
 var bodyParser = require('body-parser')
 var path = require('path')
 var http = require('http')
-//var dotenv = require('dotenv').config()
+//Uncomment the next line to use the local .env file for testing
+//Comment it out befor uploading to heroku
+var dotenv = require('dotenv').config()
 var WebSocket = require('ws')
 var ip = require('ip')
 //Global Variables
@@ -34,7 +36,7 @@ app.get('/', function(req, res){
 })
 
 app.get('/js/vigochat.js', function(req, res){
-	res.send("Suck my dick");
+	res.send("Suck my dick")
 })
 
 server.listen(httpport,()=>{
@@ -127,13 +129,13 @@ function checkHandleAvailability(handle){
 }
 
 function removeChatClient(conn){
-	console.log("Removing client " + conn);
+	console.log("Removing client " + conn)
 	for(var index = 0; index < chat_clients.length; index++){
 		if(chat_clients[index].connection == conn){
-			chat_clients.splice(index,1); 
+			chat_clients.splice(index,1)
 		}
 	}
-	updateUserLists(conn);
+	updateUserLists(conn)
 }
 
 function getChatClientHandles(){
@@ -141,7 +143,7 @@ function getChatClientHandles(){
 	for(var index = 0; index < chat_clients.length; index++){
 		clientHandles.push(chat_clients[index].getHandle())
 	}
-	return clientHandles;
+	return clientHandles
 }
 
 function updateUserLists(conn){
@@ -252,7 +254,7 @@ wss.on('connection', (ws,req)=>{
 
 	//When there is an error in the connection
 	ws.on('error', (err)=>{
-		var handle = getHandleForConnection(ws);
+		var handle = getHandleForConnection(ws)
 		console.log("WebSocket Error for " + handle + ":" + err.message)
 		sendDisconnectRequest(ws,handle)
 	})
