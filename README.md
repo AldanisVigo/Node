@@ -1,7 +1,9 @@
 # List of Node Examples
 
 ## 1. Node Canvas Windows System Mockup 
-- This example shows the basics of working with canvas object. A minimal window system like mechanism.
+- This example shows the basics of working with canvas object. A minimal window system like mechanism. Boredom is a beautiful thing.
+
+[Live Demo](https://canvaswindowsystem.herokuapp.com)
 
 ***
 
