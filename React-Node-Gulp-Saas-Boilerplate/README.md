@@ -1,4 +1,4 @@
-##React/Node/Gulp/Saas Boilerplate
+## React/Node/Gulp/Saas Boilerplate
 
 1. Download the LiveReload or RemoteLiveReload extension for Chrome.
 
