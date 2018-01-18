@@ -1,0 +1,58 @@
+/* Import Compass Mixins */
+@import "../../node_modules/compass-mixins/lib/compass";
+
+/* Variables */
+$white: #fff;
+$red: #f93f40;
+$bluish : #336efc;
+$orangish : #fbb254;
+
+@mixin round_top_borders($amount){
+	@include border-top-left-radius($amount)
+	@include border-top-right-radius($amount)
+}
+@mixin round_bottom_borders($amount){
+	@include border-bottom-left-radius($amount)
+	@include border-bottom-right-radius($amount)
+}
+
+body{
+	background: $white;
+}
+@keyframes doRotation{
+	from{
+		@include filter(blur(4px));
+	}
+	to{
+		@include filter(blur(0px));
+	}
+}
+.unordered{
+	background: $bluish;
+	border: 1px solid black;
+	list-style-type: none;
+	margin: 0;
+	padding: 2px;
+	@include border-radius(5px);
+	transform-style: initial;
+	li{
+		padding: 5px;
+		background: $orangish;
+		// @include filter(blur(4px));
+		&:hover{
+			background-color: fade-out($orangish, 0.2);
+			cursor: pointer;
+			font-weight: bold;
+			color: $white;
+			animation-name: doRotation;
+			animation-duration: 1s;
+			@include filter(blur(0px));
+		}
+		&:first-child{
+			@include round_top_borders(20px);
+		}
+		&:last-child{
+			@include round_bottom_borders(20px);
+		}
+	}
+}
